@@ -19,3 +19,14 @@ export interface ClerkUser {
   }[];
   imageUrl?: string | null;
 }
+
+export interface Conversation {
+  id: string;
+  title: string;
+  isPinned: boolean;
+  updatedAt: Date | String;
+  lastMessage: any;
+  lastMessageRole: string;
+  messageCount: number;
+  lastMessageAt: String | Date;
+}

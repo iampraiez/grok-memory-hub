@@ -16,8 +16,8 @@ async function authRoutes(fastify: FastifyInstance) {
           include: { conversations: true },
         });
       } catch (err) {
-        console.error("[auth] DB error", err);
-        return reply.status(500).send({
+        fastify.log.error(`[auth] DB error: ${err}`);
+        return reply.code(500).send({
           data: null,
           error: {
             message: err instanceof Error ? err.message : "Database error",
@@ -25,7 +25,7 @@ async function authRoutes(fastify: FastifyInstance) {
         });
       }
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         data: user,
         error: null,
       });
@@ -36,7 +36,7 @@ async function authRoutes(fastify: FastifyInstance) {
     "/logout",
     async (request: FastifyRequest | any, reply: FastifyReply) => {
       request.user = null;
-      return reply.status(200).send({
+      return reply.code(200).send({
         data: null,
         error: null,
       });
@@ -54,8 +54,8 @@ async function authRoutes(fastify: FastifyInstance) {
           where: { clerkId: user.id },
         });
       } catch (err) {
-        console.error("[auth] DB error", err);
-        return reply.status(500).send({
+        fastify.log.error(`[auth] DB error: ${err}`);
+        return reply.code(500).send({
           data: null,
           error: {
             message: err instanceof Error ? err.message : "Database error",
@@ -64,7 +64,7 @@ async function authRoutes(fastify: FastifyInstance) {
       }
 
       if (existingUser) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           data: null,
           error: { message: "User already exists" },
         });
@@ -81,8 +81,8 @@ async function authRoutes(fastify: FastifyInstance) {
           },
         });
       } catch (err) {
-        console.error("[auth] DB error on create", err);
-        return reply.status(500).send({
+        fastify.log.error(`[auth] DB error on create: ${err}`);
+        return reply.code(500).send({
           data: null,
           error: {
             message: err instanceof Error ? err.message : "Database error",
@@ -90,7 +90,7 @@ async function authRoutes(fastify: FastifyInstance) {
         });
       }
 
-      return reply.status(201).send({
+      return reply.code(201).send({
         data: {
           message: "User registered successfully",
           user: newUser,
@@ -111,8 +111,8 @@ async function authRoutes(fastify: FastifyInstance) {
           where: { clerkId: user.id },
         });
       } catch (err) {
-        console.error("[auth] DB error", err);
-        return reply.status(500).send({
+        fastify.log.error(`[auth] DB error${err}`);
+        return reply.code(500).send({
           data: null,
           error: {
             message: err instanceof Error ? err.message : "Database error",
@@ -121,7 +121,7 @@ async function authRoutes(fastify: FastifyInstance) {
       }
 
       if (!existingUser) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           data: null,
           error: { message: "User does not exist" },
         });
@@ -143,7 +143,7 @@ async function authRoutes(fastify: FastifyInstance) {
         existingUser = updatedUser;
       }
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         data: {
           message: "User logged in successfully",
           user: existingUser,

@@ -30,3 +30,29 @@ export interface Conversation {
   messageCount: number;
   lastMessageAt: String | Date;
 }
+
+export interface AImessage {
+  content: string;
+  reasoning?: { enabled: boolean };
+}
+
+// array
+export interface AIresponse {
+  logprobs?: null;
+  finish_reason: string;
+  native_finish_reason?: string;
+  index: number;
+  message: {
+    role: string;
+    content: string;
+  };
+  refusal?: null;
+  reasoning?: null;
+  reasoning_details: {
+    id: string;
+    format: string;
+    index: number;
+    type: string;
+    data: string;
+  }[];
+}

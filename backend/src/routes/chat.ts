@@ -15,8 +15,8 @@ async function chatRoutes(fastify: FastifyInstance) {
           },
         });
       } catch (err) {
-        console.error("[conversation] DB error", err);
-        return reply.status(500).send({
+        fastify.log.error(`[conversation] DB error: ${err}`);
+        return reply.code(500).send({
           data: null,
           error: {
             message: err instanceof Error ? err.message : "Database error",
@@ -24,7 +24,7 @@ async function chatRoutes(fastify: FastifyInstance) {
         });
       }
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         data: conversation.id,
         error: null,
       });
@@ -50,8 +50,8 @@ async function chatRoutes(fastify: FastifyInstance) {
           },
         });
       } catch (err) {
-        console.error("[conversation] DB error", err);
-        return reply.status(500).send({
+        fastify.log.error(`[conversation] DB error: ${err}`);
+        return reply.code(500).send({
           data: null,
           error: {
             message: err instanceof Error ? err.message : "Database error",
@@ -71,7 +71,7 @@ async function chatRoutes(fastify: FastifyInstance) {
         };
       });
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         data: conversations as Conversation[],
         error: null,
       });
@@ -90,7 +90,7 @@ async function chatRoutes(fastify: FastifyInstance) {
           select: { userId: true },
         });
         if (conversation?.userId !== userId) {
-          return reply.status(404).send({
+          return reply.code(404).send({
             data: null,
             error: {
               message: "Unauthorized",
@@ -102,13 +102,13 @@ async function chatRoutes(fastify: FastifyInstance) {
           data: { title, isPinned },
         });
 
-        return reply.status(200).send({
+        return reply.code(200).send({
           data: "ok",
           error: null,
         });
       } catch (err) {
-        console.error("[conversation] DB error", err);
-        return reply.status(500).send({
+        fastify.log.error(`[conversation] DB error: ${err}`);
+        return reply.code(500).send({
           data: null,
           error: {
             message: err instanceof Error ? err.message : "Error updating",
@@ -129,7 +129,15 @@ async function chatRoutes(fastify: FastifyInstance) {
           select: { userId: true },
         });
         if (conversation?.userId !== userId) {
-          return reply.status(404).send({
+          if (!conversation) {
+            return reply.code(404).send({
+              data: null,
+              error: {
+                message: "Conversation not found",
+              },
+            });
+          }
+          return reply.code(404).send({
             data: null,
             error: {
               message: "Unauthorized",
@@ -141,13 +149,13 @@ async function chatRoutes(fastify: FastifyInstance) {
             id,
           },
         });
-        return reply.status(200).send({
+        return reply.code(200).send({
           data: "ok",
           error: null,
         });
       } catch (err) {
-        console.error("[conversation] DB error", err);
-        return reply.status(500).send({
+        fastify.log.error(`[conversation] DB error: ${err}`);
+        return reply.code(500).send({
           data: null,
           error: {
             message: err instanceof Error ? err.message : "Error updating",

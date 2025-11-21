@@ -1,10 +1,7 @@
 import { clerkClient, getAuth } from "@clerk/fastify";
-import fastify from "fastify";
+import { FastifyRequest, FastifyReply } from "fastify";
 
-async function authMiddleware(
-  req: fastify.FastifyRequest | any,
-  res: fastify.FastifyReply
-) {
+async function authMiddleware(req: FastifyRequest | any, res: FastifyReply) {
   try {
     const { userId, isAuthenticated } = await getAuth(req);
     if (!userId || !isAuthenticated) {

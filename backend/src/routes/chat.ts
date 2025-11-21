@@ -1,14 +1,11 @@
 import prisma from "../lib/prisma.js";
-import fastify from "fastify";
+import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
 import type { Conversation } from "../types/index.js";
 
-async function chatRoutes(fastify: fastify.FastifyInstance) {
+async function chatRoutes(fastify: FastifyInstance) {
   fastify.post(
     "/new",
-    async (
-      request: fastify.FastifyRequest | any,
-      reply: fastify.FastifyReply
-    ) => {
+    async (request: FastifyRequest | any, reply: FastifyReply) => {
       const userId = request.user.id as string;
       let conversation;
       try {
@@ -36,10 +33,7 @@ async function chatRoutes(fastify: fastify.FastifyInstance) {
 
   fastify.get(
     "/all",
-    async (
-      request: fastify.FastifyRequest | any,
-      reply: fastify.FastifyReply
-    ) => {
+    async (request: FastifyRequest | any, reply: FastifyReply) => {
       const userId = request.user.id as string;
       let conversations;
       try {
@@ -70,9 +64,9 @@ async function chatRoutes(fastify: fastify.FastifyInstance) {
           title: convo.title || "No title assigned yet",
           isPinned: convo.isPinned,
           updatedAt: convo.updatedAt,
-          lastMessage: convo.messages[0] || null,
-          lastMessageRole: convo.messages[0]?.role || null,
-          messageCount: convo._count.messages || 0,
+          lastMessage: convo.messages?.[0] || null,
+          lastMessageRole: convo.messages?.[0]?.role || null,
+          messageCount: convo?._count.messages || 0,
           lastMessageAt: convo.messages[0]?.createdAt || null,
         };
       });
@@ -86,10 +80,7 @@ async function chatRoutes(fastify: fastify.FastifyInstance) {
 
   fastify.put(
     "/:id/edit",
-    async (
-      request: fastify.FastifyRequest | any,
-      reply: fastify.FastifyReply
-    ) => {
+    async (request: FastifyRequest | any, reply: FastifyReply) => {
       const { id } = request.params;
       const userId = request.user.id as string;
       const { title, isPinned } = request.body;
@@ -129,10 +120,7 @@ async function chatRoutes(fastify: fastify.FastifyInstance) {
 
   fastify.delete(
     "/:id",
-    async (
-      request: fastify.FastifyRequest | any,
-      reply: fastify.FastifyReply
-    ) => {
+    async (request: FastifyRequest | any, reply: FastifyReply) => {
       const { id } = request.params;
       const userId = request.user.id as string;
       try {

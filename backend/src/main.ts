@@ -17,23 +17,37 @@ const server = fastify({
   },
 });
 
-server.register(clerkPlugin);
+async function runServer() {
+  await server.register(clerkPlugin, {
+    publishableKey: process.env.CLERK_PUBLISHABLE_KEY!,
+    secretKey: process.env.CLERK_SECRET_KEY!,
+  });
 
-server.addHook("onRequest", authMiddleware);
-server.addHook("onError", (request, reply, error, done) => {
-  console.error("[Hook error]", error);
-  done();
-});
+  server.register(async (fastify) => {
+    fastify.addHook("onRequest", authMiddleware);
+    fastify.addHook("onError", (request, reply, error, done) => {
+      console.error("[Hook error]", error);
+      done();
+    });
+  });
 
-server.register(health, { prefix: "/api/health" });
-server.register(authRoutes, { prefix: "/api/auth" });
-server.register(chatRoutes, { prefix: "/api/chat" });
-server.register(messageRoutes, { prefix: "/api/messages" });
+  server.register(health, { prefix: "/api/health" });
+  server.register(authRoutes, { prefix: "/api/auth" });
+  server.register(chatRoutes, { prefix: "/api/chat" });
+  server.register(messageRoutes, { prefix: "/api/messages" });
 
-server.listen({ port: parseInt(process.env.PORT!) || 3000 }, (err, address) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
-  console.log(`Server listening at ${address}`);
-});
+  server.listen(
+    { port: parseInt(process.env.PORT!) || 3000 },
+    (err, address) => {
+      if (err) {
+        console.error(err);
+        process.exit(1);
+      }
+      console.log(
+        `Server listening at ${address} {${process.env.CLERK_PUBLISHABLE_KEY}}`
+      );
+    }
+  );
+}
+
+runServer();

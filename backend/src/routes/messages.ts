@@ -1,13 +1,10 @@
 import prisma from "../lib/prisma.js";
-import fastify from "fastify";
+import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
 
-async function messageRoutes(fastify: fastify.FastifyInstance) {
+async function messageRoutes(fastify: FastifyInstance) {
   fastify.get(
     "/:convoId",
-    async (
-      request: fastify.FastifyRequest | any,
-      reply: fastify.FastifyReply
-    ) => {
+    async (request: FastifyRequest | any, reply: FastifyReply) => {
       const userId = request.user.id as string;
       const { convoId } = request.params;
       let conversation;
@@ -49,10 +46,7 @@ async function messageRoutes(fastify: fastify.FastifyInstance) {
 
   fastify.post(
     "/:convoId",
-    async (
-      request: fastify.FastifyRequest | any,
-      reply: fastify.FastifyReply
-    ) => {
+    async (request: FastifyRequest | any, reply: FastifyReply) => {
       const userId = request.user.id as string;
       const { convoId } = request.params;
       const { role, content } = request.body;
@@ -107,67 +101,64 @@ async function messageRoutes(fastify: fastify.FastifyInstance) {
     }
   );
 
-  fastify.patch(
-    "/:messageId",
-    async (request: fastify.FastifyRequest | any, reply) => {
-      const userId = request.user.id as string;
-      const { messageId } = request.params;
-      const { content } = request.body;
+  fastify.patch("/:messageId", async (request: FastifyRequest | any, reply) => {
+    const userId = request.user.id as string;
+    const { messageId } = request.params;
+    const { content } = request.body;
 
-      let existingMessage;
-      try {
-        existingMessage = await prisma.message.findUnique({
-          where: { id: messageId },
-          include: { conversation: true },
-        });
+    let existingMessage;
+    try {
+      existingMessage = await prisma.message.findUnique({
+        where: { id: messageId },
+        include: { conversation: true },
+      });
 
-        if (!existingMessage) {
-          return reply.status(404).send({
-            data: null,
-            error: { message: "Message not found" },
-          });
-        }
-      } catch (err) {
-        console.error("[message] DB find error", err);
-        return reply.status(500).send({
+      if (!existingMessage) {
+        return reply.status(404).send({
           data: null,
-          error: { message: "Database error" },
+          error: { message: "Message not found" },
         });
       }
-
-      if (existingMessage.conversation.userId !== userId) {
-        return reply.status(403).send({
-          data: null,
-          error: { message: "Unauthorized" },
-        });
-      }
-
-      try {
-        const updatedMessage = await prisma.message.update({
-          where: { id: messageId },
-          data: { content },
-        });
-
-        await prisma.message.deleteMany({
-          where: {
-            conversationId: updatedMessage.conversationId,
-            createdAt: { gt: updatedMessage.createdAt },
-          },
-        });
-
-        return reply.status(200).send({
-          data: "updated",
-          error: null,
-        });
-      } catch (err) {
-        console.error("[message] DB update/delete error", err);
-        return reply.status(500).send({
-          data: null,
-          error: { message: "Error editing message" },
-        });
-      }
+    } catch (err) {
+      console.error("[message] DB find error", err);
+      return reply.status(500).send({
+        data: null,
+        error: { message: "Database error" },
+      });
     }
-  );
+
+    if (existingMessage.conversation.userId !== userId) {
+      return reply.status(403).send({
+        data: null,
+        error: { message: "Unauthorized" },
+      });
+    }
+
+    try {
+      const updatedMessage = await prisma.message.update({
+        where: { id: messageId },
+        data: { content },
+      });
+
+      await prisma.message.deleteMany({
+        where: {
+          conversationId: updatedMessage.conversationId,
+          createdAt: { gt: updatedMessage.createdAt },
+        },
+      });
+
+      return reply.status(200).send({
+        data: "updated",
+        error: null,
+      });
+    } catch (err) {
+      console.error("[message] DB update/delete error", err);
+      return reply.status(500).send({
+        data: null,
+        error: { message: "Error editing message" },
+      });
+    }
+  });
 }
 
 export default messageRoutes;

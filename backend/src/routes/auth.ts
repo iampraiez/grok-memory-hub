@@ -1,14 +1,12 @@
 import prisma from "../lib/prisma.js";
-import fastify from "fastify";
+import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
+
 import type { ClerkUser } from "../types/index.js";
 
-async function authRoutes(fastify: fastify.FastifyInstance) {
+async function authRoutes(fastify: FastifyInstance) {
   fastify.get(
     "/me",
-    async (
-      request: fastify.FastifyRequest | any,
-      reply: fastify.FastifyReply
-    ) => {
+    async (request: FastifyRequest | any, reply: FastifyReply) => {
       const userId = request.user.id as string;
 
       let user;
@@ -36,10 +34,7 @@ async function authRoutes(fastify: fastify.FastifyInstance) {
 
   fastify.get(
     "/logout",
-    async (
-      request: fastify.FastifyRequest | any,
-      reply: fastify.FastifyReply
-    ) => {
+    async (request: FastifyRequest | any, reply: FastifyReply) => {
       request.user = null;
       return reply.status(200).send({
         data: null,
@@ -50,10 +45,7 @@ async function authRoutes(fastify: fastify.FastifyInstance) {
 
   fastify.post(
     "/register",
-    async (
-      request: fastify.FastifyRequest | any,
-      reply: fastify.FastifyReply
-    ) => {
+    async (request: FastifyRequest | any, reply: FastifyReply) => {
       const user = request.user as ClerkUser;
 
       let existingUser;
@@ -110,10 +102,7 @@ async function authRoutes(fastify: fastify.FastifyInstance) {
 
   fastify.post(
     "/login",
-    async (
-      request: fastify.FastifyRequest | any,
-      reply: fastify.FastifyReply
-    ) => {
+    async (request: FastifyRequest | any, reply: FastifyReply) => {
       const user = request.user as ClerkUser;
 
       let existingUser;

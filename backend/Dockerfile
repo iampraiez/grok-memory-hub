@@ -6,7 +6,7 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-RUN npm prisma
+RUN npx prisma generate && npx prisma db push
 RUN npm run build
 
 # Production stage

@@ -1,13 +1,13 @@
 # Build stage
-FROM node:20-bullseye as builder
+FROM node:20-bullseye
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm install --omit=dev
 
 COPY . .
-RUN npx prisma generate
+RUN npm prisma
 RUN npm run build
 
 # Production stage

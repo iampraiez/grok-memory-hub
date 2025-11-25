@@ -1,5 +1,5 @@
 # Build stage
-FROM node:22 AS builder
+FROM node:20-bullseye as builder
 
 WORKDIR /app
 

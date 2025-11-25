@@ -36,7 +36,7 @@ export interface AImessage {
   reasoning?: { enabled: boolean };
 }
 
-// array
+
 export interface AIresponse {
   logprobs?: null;
   finish_reason: string;

@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: grok-memory-hub-backend
+    env: docker
+    region: oregon
+    plan: free
+    branch: main
+    rootDir: backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        value: tngtech/deepseek-r1t2-chimera

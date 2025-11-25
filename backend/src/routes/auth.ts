@@ -1,4 +1,4 @@
-import prisma from "../lib/prisma.js";
+import { prisma } from "../lib/prisma.js";
 import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
 
 import type { ClerkUser } from "../types/index.js";

@@ -1,7 +1,7 @@
 import { clerkClient, getAuth } from "@clerk/fastify";
 import { FastifyRequest, FastifyReply } from "fastify";
 
-// also check if user is in db except login and register
+
 async function authMiddleware(req: FastifyRequest | any, res: FastifyReply) {
   try {
     const url = req.url;
@@ -12,16 +12,16 @@ async function authMiddleware(req: FastifyRequest | any, res: FastifyReply) {
     ) {
       return;
     }
-    // const { userId, isAuthenticated } = await getAuth(req);
-    // if (!userId || !isAuthenticated) {
-    //   return res.code(401).send({
-    //     data: null,
-    //     error: {
-    //       message: "Unauthorized",
-    //     },
-    //   });
-    // }
-    // const user = await clerkClient.users.getUser(userId);
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     req.user = {
       id: "clerk-dummy-id",
       username: "clerk-dummy-username",

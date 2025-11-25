@@ -1,120 +1,88 @@
-import prisma from "../lib/prisma";
-import { GrokService } from "./grok.service";
-import {
-  toExtractPrompt,
-  memoryExtractorPrompt,
-  searchPrompt,
-  responsePrompt,
-} from "../data/prompt";
+import { Memory } from "@prisma/client";
+import { FlagEmbedding, EmbeddingModel } from "fastembed";
+import { prisma } from "../lib/prisma";
 
-const grok = new GrokService();
 
 export class MemoryService {
-  static async saveFromUser(
-    content: string,
-    userId: string,
-    conversationId: string
-  ) {
-    const chunks = content.match(/.{1,500}(\s|$)/g) || [content];
+  private embeddingModel: FlagEmbedding | null = null;
 
-    for (const chunk of chunks) {
-      if (chunk.trim().length < 20) continue;
-
-      await prisma.memory.upsert({
-        where: {
-          userId_conversationId_content: {
-            userId,
-            conversationId,
-            content: chunk.trim(),
-          },
-        },
-        update: {},
-        create: {
-          userId,
-          conversationId,
-          content: chunk.trim(),
-        },
+  async initialize() {
+    if (!this.embeddingModel) {
+      this.embeddingModel = await FlagEmbedding.init({
+        model: EmbeddingModel.BGESmallENV15,
       });
     }
   }
 
-  static async saveFromAssistant(
-    content: string,
-    userId: string,
-    conversationId: string
-  ) {
-    const extractPrompt = toExtractPrompt(content);
-    let facts: string[] = [];
-
-    try {
-      const response = await grok.response([
-        {
-          role: "system",
-          content: memoryExtractorPrompt,
-        },
-        { role: "user", content: extractPrompt },
-      ]);
-
-      const raw = response.choices[0]?.message?.content?.trim() || "[]";
-      facts = JSON.parse(raw);
-    } catch (err) {
-      console.error("Memory extraction failed:", err);
-      return;
-    }
-
-    for (const fact of facts) {
-      if (fact.length > 300 || fact.length < 20) continue;
-
-      await prisma.memory.upsert({
-        where: {
-          userId_conversationId_content: {
-            userId,
-            conversationId,
-            content: fact.trim(),
-          },
-        },
-        update: {},
-        create: {
-          userId,
-          conversationId,
-          content: fact.trim(),
-        },
-      });
-    }
-  }
-
-  static async searchRelevant(
-    userId: string,
-    currentMessage: string
-  ): Promise<string[]> {
-    const keywordPrompt = searchPrompt(currentMessage);
-
-    let keywords: string[] = [];
-
-    try {
-      const response = await grok.response([
-        {
-          role: "system",
-          content: responsePrompt,
-        },
-        { role: "user", content: keywordPrompt },
-      ]);
-      const raw = response.choices[0]?.message?.content?.trim() || "[]";
-      keywords = JSON.parse(raw).map((k: string) => k.toLowerCase());
-    } catch {
-      keywords = currentMessage.toLowerCase().split(" ").slice(0, 6);
-    }
-
-    if (keywords.length === 0) return [];
-
-    const results = await prisma.memory.findMany({
-      where: { userId, content: { contains: keywords[0] } },
-      orderBy: { createdAt: "desc" },
-      take: 6,
+  async createMemory(userId: string, content: string, conversationId?: string, tags: string[] = []) {
+    const embedding = await this.generateEmbedding(content);
+    
+    const memory = await prisma.memory.create({
+      
+      data: {
+        userId,
+        content,
+        tags,
+        conversationId,
+      },
     });
 
-    return results.map(
-      (r) => `Memory from ${r.createdAt.toLocaleDateString()}: ${r.content}`
-    );
+    
+    await prisma.$executeRaw`
+      UPDATE memories 
+      SET embedding = ${embedding}::vector
+      WHERE id = ${memory.id}
+    `;
+
+    return memory;
+  }
+
+  async searchMemories(userId: string, query: string, limit: number = 5, sortBy: 'relevance' | 'recency' = 'relevance') {
+    const queryEmbedding = await this.generateEmbedding(query);
+    
+    
+    
+    const fetchLimit = sortBy === 'recency' ? limit * 3 : limit;
+
+    const memories = await prisma.$queryRaw<Memory[]>`
+      SELECT id, content, "createdAt", "conversationId", tags
+      FROM memories
+      WHERE "userId" = ${userId}
+      ORDER BY embedding <=> ${queryEmbedding}::vector
+      LIMIT ${fetchLimit}
+    `;
+
+    if (sortBy === 'recency') {
+      
+      return memories.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, limit);
+    }
+
+    return memories;
+  }
+
+  async generateEmbedding(text: string): Promise<number[]> {
+    if (!this.embeddingModel) await this.initialize();
+    
+    const embeddings = this.embeddingModel!.embed([text]);
+    let embedding: number[] = [];
+    for await (const batch of embeddings) {
+        
+        
+        
+        embedding = Array.from(batch[0]);
+        break;
+    }
+    return embedding;
+  }
+
+  async getContext(userId: string, query: string, limit: number = 5, sortBy: 'relevance' | 'recency' = 'relevance'): Promise<string> {
+    const memories = await this.searchMemories(userId, query, limit, sortBy);
+    if (memories.length === 0) return "";
+
+    return memories
+      .map((m) => `- ${m.content} (Date: ${m.createdAt.toISOString().split("T")[0]})`)
+      .join("\n");
   }
 }
+
+export const memoryService = new MemoryService();

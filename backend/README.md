@@ -1,103 +1,97 @@
-# Grok Memory Hub – Backend
+# Grok Memory Hub - Backend
 
-### Permanent, cross-conversation memory for Grok-4 (built with real xAI API)
+The backend service for Grok Memory Hub, built with Fastify, Prisma, and TypeScript. It provides a robust API for chat interactions, memory management, and RAG (Retrieval-Augmented Generation) capabilities.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Fastify](https://img.shields.io/badge/Fastify-000000?logo=fastify&logoColor=white)](https://fastify.io/)
-[![Prisma](https://img.shields.io/badge/Prisma-2D3748?logo=prisma&logoColor=white)](https://prisma.io/)
-[![Grok API](https://img.shields.io/badge/Grok%20API-xAI-00A3E0)](https://x.ai/api)
+## 🚀 Tech Stack
 
-**Live Demo** → _(coming soon)_  
-**Built by @satoru707** – a solo developer who refused to let Grok forget.
+-   **Framework**: [Fastify](https://www.fastify.io/) - High-performance web framework.
+-   **Language**: TypeScript - Type-safe JavaScript.
+-   **Database**: PostgreSQL (via [Prisma ORM](https://www.prisma.io/)).
+-   **Authentication**: [Clerk](https://clerk.com/) - User management and authentication.
+-   **LLM Integration**: [OpenRouter](https://openrouter.ai/) - Access to various LLMs (e.g., DeepSeek, Grok).
+-   **Embeddings**: `fastembed` - Local embedding generation for RAG.
+-   **Validation**: `zod` - Schema validation.
+-   **Deployment**: Docker & Render.
 
----
+## 🛠️ Setup & Installation
 
-## Why This Exists
+### Prerequisites
+-   Node.js >= 20
+-   pnpm (recommended) or npm
+-   PostgreSQL database
+-   Clerk account
+-   OpenRouter API key
 
-As of November 2025, **official Grok still has zero long-term memory**.  
-Every new chat = amnesia.
+### 1. Install Dependencies
+```bash
+cd backend
+pnpm install
+```
 
-This backend turns Grok into a **true second brain**:
-
-- Unlimited conversations
-- Full-text + semantic search across all history
-- Smart RAG – only injects relevant memories (low token usage)
-- Multiple chats, one brain
-- Future-ready for file uploads, projects, sharing, voice, etc.
-
-This is the #1 missing feature in Grok.  
-I'm fixing it in public.
-
----
-
-## Core Features (Backend)
-
-| Feature                                    | Status  | Description                                                                   |
-| ------------------------------------------ | ------- | ----------------------------------------------------------------------------- |
-| Real Grok-4 API integration                | Done    | Streaming responses via `api.x.ai/v1` (OpenAI-compatible)                     |
-| Permanent message storage                  | Done    | PostgreSQL + Prisma – every message forever                                   |
-| Multi-conversation support                 | Done    | Users can create unlimited chats like official Grok, but everything is linked |
-| Global full-text search                    | Done    | Search every word you ever said to Grok                                       |
-| Smart RAG (Retrieval-Augmented Generation) | Done    | Only injects relevant past snippets → keeps context small & cheap             |
-| Clerk Auth (X/Twitter login)               | Done    | Zero-boilerplate, production-grade authentication                             |
-| Streaming responses                        | Done    | Real-time token streaming (feels instant)                                     |
-| Rate limiting & usage tracking             | Planned | Prevent abuse, show user quota                                                |
-| File & image memory                        | Planned | Upload once → reference forever                                               |
-| Shareable conversation links               | Planned | Public read-only or edit links                                                |
-
----
-
-## Tech Stack (Backend)
-
-| Layer      | Technology                | Why we chose it                               |
-| ---------- | ------------------------- | --------------------------------------------- |
-| Language   | TypeScript                | Type safety + best devex                      |
-| Framework  | Fastify                   | Faster than Express, built-in validation      |
-| ORM        | Prisma + PostgreSQL       | Best DX in 2025, schema migrations, type-safe |
-| Auth       | Clerk                     | X/Twitter login, free tier forever            |
-| LLM        | Grok-4 (official xAI API) | Real Grok,model                               |
-| Deployment | Railway / Fly.io / Render | Free Postgres + global edge                   |
-
----
-
-## Project Structure (Backend)
-
-backend/
-├── src/
-│ ├── routes/ # All API endpoints
-│ ├── services/ # Grok API, RAG logic, embeddings
-│ ├── middleware/ # Auth protection
-│ └── main.ts # Server entry
-├── prisma/
-│ └── schema.prisma # Users, Conversations, Messages
-└── package.json
-text---
-
-## API Endpoints (v1)
-
-| Method | Endpoint                          | Description                            |
-| ------ | --------------------------------- | -------------------------------------- |
-| GET    | `/api/conversations`              | List all user conversations            |
-| POST   | `/api/conversations`              | Create new conversation                |
-| GET    | `/api/conversations/:id/messages` | Load messages for a conversation       |
-| POST   | `/api/chat`                       | Main streaming endpoint (with memory)  |
-| GET    | `/api/search?q=...`               | Global search across all conversations |
-| GET    | `/health`                         | Health check                           |
-
----
-
-## Environment Variables (`.env`)
+### 2. Environment Variables
+Create a `.env` file in the `backend` directory based on `.env.example`:
 
 ```env
+# Server
+PORT=3001
+NODE_ENV=development
+
 # Database
-DATABASE_URL=postgresql://...
+DATABASE_URL="postgresql://user:password@localhost:5432/grok_memory_hub"
 
-# Grok API (real xAI)
-GROK_API_KEY=gsk_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-GROK_BASE_URL=https://api.x.ai/v1
+# Clerk Auth
+CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
 
-# Auth
-CLERK_SECRET_KEY=sk_live_...
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
+# OpenRouter (LLM)
+OPENROUTER_API_KEY=sk-or-...
+OPENROUTER_MODEL=tngtech/deepseek-r1t2-chimera
 ```
+
+### 3. Database Setup
+Run Prisma migrations to set up your database schema:
+
+```bash
+pnpm prisma generate
+pnpm prisma db push
+```
+
+### 4. Run Locally
+Start the development server:
+
+```bash
+pnpm dev
+```
+The server will start at `http://localhost:3001`.
+
+## 🐳 Docker Deployment
+
+### Build Image
+```bash
+docker build -t grok-backend .
+```
+
+### Run Container
+```bash
+docker run -p 3001:3001 --env-file .env grok-backend
+```
+
+### Render Deployment
+This project includes a `render.yaml` Blueprint for easy deployment on [Render](https://render.com/).
+1.  Connect your repository to Render.
+2.  Select "New Blueprint Instance".
+3.  Render will automatically detect the configuration.
+
+## 🔌 API Endpoints
+
+### Chat
+-   `POST /api/chat`: Send a message and receive a streaming response. Supports attachments and web search.
+-   `GET /api/chat/conversations`: List user conversations.
+-   `GET /api/chat/conversations/:id`: Get messages for a specific conversation.
+
+### Memory
+-   `POST /api/memories`: Manually add a memory.
+-   `GET /api/memories/search`: Search memories using vector similarity.
+
+### System
+-   `GET /health`: Health check endpoint.

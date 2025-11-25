@@ -9,3 +9,14 @@ pnpm-lock.yaml
 generated
 
 dist/
+
+local_cache
+
+verify_backend.ts
+test_rotes.ts
+
+inspect_flag_embedding.ts
+
+inspect_fastembed.ts
+
+test_routes.ts

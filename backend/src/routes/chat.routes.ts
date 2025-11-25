@@ -1,10 +1,9 @@
 import { createRequire } from "module";
 import { prisma } from "../lib/prisma";
 import { getAuth } from "@clerk/fastify";
-import { memoryService } from "../services/memory.service";
-import { ragService } from "../services/rag.service";
-import { searchService } from "../services/search.service";
-import { GrokService} from "../services/grok.service";
+import { memoryService } from "../services/memory.service.js";
+import { searchService } from "../services/search.service.js";
+import { GrokService } from "../services/grok.service.js";
 import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
 const require = createRequire(import.meta.url);
 const pdf = require("pdf-parse");

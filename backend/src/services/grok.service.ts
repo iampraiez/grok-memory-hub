@@ -1,7 +1,7 @@
 import { OpenAI } from "openai";
-import { client, model } from "../lib/openai";
-import { titlePrompt, systemPrompt as prompt } from "../data/prompt";
-import { ragService } from "./rag.service";
+import { client, model } from "../lib/openai.js";
+import { titlePrompt, systemPrompt as prompt } from "../data/prompt.js";
+import { ragService } from "./rag.service.js";
 
 export class GrokService {
   private client: OpenAI = client;

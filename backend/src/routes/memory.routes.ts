@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 import { getAuth } from "@clerk/fastify";
-import { memoryService } from "../services/memory.service";
+import { memoryService } from "../services/memory.service.js";
 
 export async function memoryRoutes(fastify: FastifyInstance) {
   

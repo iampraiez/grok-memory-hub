@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 import { getAuth } from "@clerk/fastify";
 
 export async function preferencesRoutes(fastify: FastifyInstance) {

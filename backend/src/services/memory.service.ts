@@ -1,6 +1,6 @@
 import { Memory } from "@prisma/client";
 import { FlagEmbedding, EmbeddingModel } from "fastembed";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 
 
 export class MemoryService {

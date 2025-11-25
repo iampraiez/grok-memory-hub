@@ -6,12 +6,11 @@ import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import authMiddleware from "./middleware/auth.js";
 import health from "./routes/health.js";
-import authRoutes from "./routes/auth.js";
-import { chatRoutes } from "./routes/chat.routes";
-import { memoryRoutes } from "./routes/memory.routes";
-import { preferencesRoutes } from "./routes/preferences.routes";
-import { statsRoutes } from "./routes/stats.routes";
-import { exportRoutes } from "./routes/export.routes";
+import { chatRoutes } from "./routes/chat.routes.js";
+import { memoryRoutes } from "./routes/memory.routes.js";
+import { preferencesRoutes } from "./routes/preferences.routes.js";
+import { statsRoutes } from "./routes/stats.routes.js";
+import { exportRoutes } from "./routes/export.routes.js";
 
 import { ClerkUser } from "./types/index.js";
 import { validateEnv } from "./lib/env.js";

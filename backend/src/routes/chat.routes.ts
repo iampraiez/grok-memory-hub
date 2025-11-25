@@ -1,5 +1,5 @@
 import { createRequire } from "module";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 import { getAuth } from "@clerk/fastify";
 import { memoryService } from "../services/memory.service.js";
 import { searchService } from "../services/search.service.js";
